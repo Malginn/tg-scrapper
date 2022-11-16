@@ -1,77 +1,74 @@
-import requests
-from bs4 import BeautifulSoup as b
-from url import URL, dict_
+import os
+import shutil
+import urllib.request
+
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
 
 import time
-import json
+
+dict_xpath = {'name': '',
+              'seller': '',
+              'price': '',
+              'size': '',
+              'delivery': '',
+              'color': '',
+              'characteristic': '',
+              'image': ''}
+
+dict_value = dict()
 
 
-
-
-
-def get_data_with_selenium(url):
-    options = webdriver.ChromeOptions()
-    options.add_argument('--disable-software-rasterizer')
-    options.add_argument('Mozilla/5.0 (Windows NT 6.2; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0')
-    options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
-    # options.add_argument('general.useragent.override', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36')
+def get_data_with_selenium(link):
+    chrome_options = Options()
+    chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+    chrome_driver = "./chrome/chromedriver.exe"
+    driver = webdriver.Chrome(chrome_driver, chrome_options=chrome_options)
 
     try:
-        driver = webdriver.Chrome(
-            executable_path='../ozon/chrome/chromedriver.exe',
-            options=options
-        )
-        driver.get(url)
+        driver.get(link)
         time.sleep(10)
+        dict_value['name'] = driver.find_element(By.XPATH, dict_xpath['name']).text
+        dict_value['seller'] = driver.find_element(By.XPATH, dict_xpath['seller']).text
+        dict_value['price'] = driver.find_element(By.XPATH, dict_xpath['price']).text
+        dict_value['size'] = driver.find_element(By.XPATH, dict_xpath['size']).text
+        dict_value['delivery'] = driver.find_element(By.XPATH, dict_xpath['delivery']).text
+        dict_value['color'] = driver.find_element(By.XPATH, dict_xpath['color']).text
 
-        
+        characteristics = list()
+        for characteristic in driver.find_elements(By.XPATH, dict_xpath['characteristic']):
+            characteristics.append(characteristic.text)
+        print(dict_value)
 
-        # time.sleep(120)
-        # delay = 5 # seconds
-        # try:
-        #     myElem = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.ID, 'IdOfMyElement')))
-        #     print("Page is ready!")
-        # except TimeoutException:
-        #     print("Loading took too much time!")
-
-        # try:
-        #     time.sleep(10)
-
-        #     element = driver.find_element(By.XPATH, '/html/body/div[9]/div[2]/div')
-        #     print('click')
-        #     driver.execute_script("arguments[0].click();", element)
-        #         #tab-active-index-0 tb-detail w990
-        #     name = driver.find_element(By.XPATH, '//*[@id="J_Title"]/h3')
-        #     print(name.text)
-
-        #     time.sleep(10)
-        # except Exception as ex:
-        #     print(ex)
-
-        # with open('index_selenium.html', 'w', encoding='utf-8') as file:
-        #     file.write(driver.page_source)
-        
-        
+        clear_img()
+        images = driver.find_elements(By.XPATH, dict_xpath['image'])
+        for image in images:
+            download(image.get_attribute('src'), images.index(image))
 
     except Exception as ex:
         print(ex)
+
     finally:
         driver.close()
         driver.quit()
 
 
+def download(url, i):
+    resource = urllib.request.urlopen(url)
+    out = open(f"./images/image_{i}.jpg", 'wb')
+    out.write(resource.read())
+    out.close()
+
+
+def clear_img():
+    shutil.rmtree('./images')
+    os.makedirs('./images')
 
 
 def main():
-    # get_data(URL)
-    get_data_with_selenium(URL)
-
+    link = ''
+    get_data_with_selenium(link)
 
 
 if __name__ == '__main__':
