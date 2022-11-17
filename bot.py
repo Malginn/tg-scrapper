@@ -58,14 +58,11 @@ async def all_msg_handler(message: types.Message):
 
     # await message.answer_photo(message.chat.id, photo=photo, caption="text")
     media = types.MediaGroup()
-    images = dict_['image']
-    media_group = []
+    images = [base64.b64decode(i) for i in dict_['image']]
     
-    for num, img in enumerate(images):  #чтобы пордпись была только к 1 картинке и не дублировалась
-        media_group.append(types.InputMediaPhoto(base64.b64decode(img), caption = prepare_item(dict_) if num == 0 else ''))
-        # media.attach_photo(types.InputMediaPhoto(base64.b64decode(img)))
-    await bot.send_media_group(message.chat.id, media=media_group)
-
+    for num, img in enumerate(images):
+        media.attach_photo(types.InputMediaPhoto(img, caption = prepare_item(dict_) if num == 0 else ''))
+        await message.answer_media_group(media=media)
 
 
 
