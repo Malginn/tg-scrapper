@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as condition
-from selenium.common import NoSuchElementException
+from selenium.common import NoSuchElementException, TimeoutException
 
 from colorama import Fore
 
@@ -33,7 +33,7 @@ def get_data_with_selenium(link):
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
     chrome_driver = "./chrome/chromedriver.exe"
     driver = webdriver.Chrome(chrome_driver, chrome_options=chrome_options)
-    
+
     dict_value = {'name': '',
                   'seller': '',
                   'price': list(),
@@ -46,13 +46,17 @@ def get_data_with_selenium(link):
 
     try:
         driver.get(link)
-
+        timeout = 120
+        WebDriverWait(driver, timeout).until(condition.presence_of_element_located((By.XPATH, dict_xpath['name'])))
+    except TimeoutException:
+        print(Fore.RED+'TimeoutException')
+        return dict_value
     except Exception as ex:
         print(ex)
+        return dict_value
 
     else:
         try:
-            WebDriverWait(driver, 20).until(condition.presence_of_element_located((By.XPATH, dict_xpath['name'])))
             dict_value['name'] = driver.find_element(By.XPATH, dict_xpath['name']).text
         except NoSuchElementException:
             print(Fore.RED + 'Name not found')
