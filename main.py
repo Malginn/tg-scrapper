@@ -48,12 +48,12 @@ def get_data_with_selenium(link):
         driver.get(link)
         timeout = 120
         WebDriverWait(driver, timeout).until(condition.presence_of_element_located((By.XPATH, dict_xpath['name'])))
+
     except TimeoutException:
-        print(Fore.RED+'TimeoutException')
-        return dict_value
+        print(Fore.RED + 'TimeoutException')
+
     except Exception as ex:
         print(ex)
-        return dict_value
 
     else:
         try:
