@@ -21,6 +21,30 @@ async def all_msg_handler(message: types.Message):
 def parser(link):
     pass
 
+def prepare_item(dict_value):
+    string = f'''
+                Название: {dict_value['name']}\n
+                Продавец: {dict_value['seller']}\n
+                Цена: {price_split(dict_value['price'])}\n
+                Размер: {dict_value['size']}\n
+                Доставка: \n{dict_value['delivery']}\n
+                Цвет: {dict_value['color']}\n
+                Характеристика: {charac()}\n
+                
+
+             '''    #'Картинка': {dict_value['image']
+
+    return string
+
+def charac():
+    str_ch = '\n'.join(dict_['characteristic'])
+    # for i in dict_['characteristic']:
+    #     str_ch.join(i)
+    
+    return str_ch
+
+def price_split(prices):
+    pass
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
