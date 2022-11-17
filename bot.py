@@ -1,29 +1,26 @@
-import telebot
-from auth_data import token
-import requests
-
-def telegram_bot(token):
-    bot = telebot.TeleBot(token)
-
-    @bot.message_handler(commands=['start'])
-    def start_message(message):
-        bot.send_message(message.chat.id, 'hi')
+from aiogram import Bot, Dispatcher, executor, types
 
 
-    @bot.message_handler(content_types=['text'])
-    def send_text(message):
-        if 'http' in message.text.lower():
-            try:
-                bot.send_message(message.chat.id, 'you send me mes')
-            except Exception as ex:
-                print(ex)
-                bot.send_message(message.chat.id, 'bad answer')
-        else:
-            bot.send_message(message.chat.id, 'what????')
+API_TOKEN = '5692130473:AAFYtJiFHRfw2Rh1lLeDb1e7fxdywH3575U'
+
+# Initialize bot and dispatcher
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
 
 
-    bot.polling()
+@dp.message_handler(commands='start')
+async def start_cmd_handler(message: types.Message):
+    await message.answer("Hi!")
+
+
+@dp.message_handler()
+async def all_msg_handler(message: types.Message):
+    text = message.text
+
+
+def parser(link):
+    pass
+
 
 if __name__ == '__main__':
-    telegram_bot(token)
-
+    executor.start_polling(dp, skip_updates=True)
