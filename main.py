@@ -1,6 +1,5 @@
 import urllib.request
 import base64
-import json
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -9,35 +8,35 @@ from selenium.common import NoSuchElementException
 
 from colorama import Fore
 
-import time
-
-dict_xpath = {'name': '',
-              'seller': '',
-              'price': '',
-              'size': '',
-              'delivery': '',
-              'color': '',
-              'characteristic': '',
-              'image': ''}
+# import time
 
 
 def get_data_with_selenium(link):
+    dict_xpath = {'name': '//*[@class="tb-main-title"]',
+                  'seller': '//*[@class="tb-shop-name"]',
+                  'price': '//*[@class="tb-rmb-num"]',
+                  'size': '//*[@data-property="尺码"]/li/a/span',
+                  'delivery': '//*[@id="J_WlServiceInfo"]',
+                  'color': '//*[@data-property="颜色分类"]/li/a/span',
+                  'characteristic': '//*[@class="attributes-list"]/li',
+                  'image': '//*[@id="description"]/div/table/tbody/tr/td/img'}
     chrome_options = Options()
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
     chrome_driver = "./chrome/chromedriver.exe"
     driver = webdriver.Chrome(chrome_driver, chrome_options=chrome_options)
     dict_value = {'name': '',
                   'seller': '',
-                  'price': '',
-                  'size': '',
+                  'price': list(),
+                  'size': list(),
                   'delivery': '',
                   'color': '',
                   'characteristic': list(),
                   'image': list()
                   }
     try:
-        driver.get(link)
-        time.sleep(10)
+        # driver.get(link)
+        # time.sleep(10)
+        pass
 
     except Exception as ex:
         print(ex)
@@ -54,12 +53,16 @@ def get_data_with_selenium(link):
             print(Fore.RED + 'Seller not found')
 
         try:
-            dict_value['price'] = driver.find_element(By.XPATH, dict_xpath['price']).text
+            prices = driver.find_elements(By.XPATH, dict_xpath['price'])
+            for price in prices:
+                dict_value['price'].append(price.text)
         except NoSuchElementException:
             print(Fore.RED + 'Price not found')
 
         try:
-            dict_value['size'] = driver.find_element(By.XPATH, dict_xpath['size']).text
+            sizes = driver.find_elements(By.XPATH, dict_xpath['size'])
+            for size in sizes:
+                dict_value['size'].append(size.text)
         except NoSuchElementException:
             print(Fore.RED + 'Size not found')
 
@@ -87,10 +90,9 @@ def get_data_with_selenium(link):
             print(Fore.RED + 'Images not found')
 
     finally:
-        driver.close()
-        driver.quit()
-        dump = json.dumps(dict_value)
-        return dump
+        # driver.close()
+        # driver.quit()
+        return dict_value
 
 
 def download(url):
@@ -103,9 +105,8 @@ def download(url):
 
 def main():
     link = ''
-    dump = get_data_with_selenium(link)
-    print(Fore.YELLOW + 'dump finally ready')
-    print(Fore.GREEN + f'Result: {dump}')
+    data = get_data_with_selenium(link)
+    print(Fore.GREEN + 'dump finally ready')
 
 
 if __name__ == '__main__':
