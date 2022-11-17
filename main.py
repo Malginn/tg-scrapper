@@ -56,6 +56,18 @@ def get_data_with_selenium(link):
         print(ex)
 
     else:
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6);")
+        time.sleep(0.5)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6*2);")
+        time.sleep(0.5)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6*3);")
+        time.sleep(0.5)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6*4);")
+        time.sleep(0.5)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6*5);")
+        time.sleep(0.5)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(0.5)
         try:
             dict_value['name'] = driver.find_element(By.XPATH, dict_xpath['name']).text
         except NoSuchElementException:

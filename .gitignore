@@ -3,3 +3,4 @@ index_selenium.html
 chrome
 .idea
 *.rar
+__pycache__
