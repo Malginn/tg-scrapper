@@ -1,18 +1,15 @@
 import urllib.request
-import base64
 import os
+import time
 
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as condition
 from selenium.common import NoSuchElementException, TimeoutException
 
 from colorama import Fore
-
-import time
-
-from selenium.webdriver.support.wait import WebDriverWait
 
 
 def get_data_with_selenium(link):
@@ -110,8 +107,8 @@ def get_data_with_selenium(link):
 
         try:
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
-            for num, image in enumerate(images):
-                dict_value['image'].append(download(image.get_attribute('src'), num))
+            for image in images:
+                dict_value['image'].append(download(image.get_attribute('src'), images.index(image)))
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
 
@@ -125,23 +122,4 @@ def download(url, num):
     resource = urllib.request.urlopen(url)
     with open(f"./images/test{num}.jpg", 'wb') as out:
         out.write(resource.read())
-    
-
-    # image = base64.b64encode(resource.read())
-    # for decode use:
-    # base64.b64decode(image)
-
-
-def main(text='https://item.taobao.com/item.htm?id=687815414870&price=194.99&sourceType=item&sourceType=item&suid=f4ab6dfd-3c89-4606-81a7-b9b74ad5adb9&ut_sk=1.YgbGi%2FkQyU0DAD3WQG9i%2BcAZ_21646297_1668264784118.Copy.ShareGlobalNavigation_1&un=75b8c07d63d793d3b869032d15dddb3f&share_crt_v=1&un_site=0&spm=a2159r.13376460.0.0&sp_abtk=gray_ShareGlobalNavigation_1_code_simpleAndroid&tbSocialPopKey=shareItem&sp_tk=dDZDYmQxck1TdW4%3D&cpp=1&shareurl=true&short_name=h.UgFnSN4&bxsign=scd7fVjWiuAdaVF9IWPRnH-aVCofWKHVNbA9YOC3YWLrrDMwNZgLit2jZUBIBDj6aNhOlcPfcXr_odogmSCQeRh6J4dKjZVoBf6uA-NLYQRYgB-5yC2nYyX5N4fDyv9RViOgmgYDKfBaP4phh2IL6qczQ&tk=t6Cbd1rMSun&app=chrome&price=194.99&sourceType=item&sourceType=item&suid=f4ab6dfd-3c89-4606-81a7-b9b74ad5adb9&ut_sk=1.YgbGi%2FkQyU0DAD3WQG9i%2BcAZ_21646297_1668264784118.Copy.ShareGlobalNavigation_1&un=75b8c07d63d793d3b869032d15dddb3f&share_crt_v=1&un_site=0&spm=a2159r.13376460.0.0&sp_abtk=gray_ShareGlobalNavigation_1_code_simpleAndroid&tbSocialPopKey=shareItem&sp_tk=dDZDYmQxck1TdW4%3D&cpp=1&shareurl=true&short_name=h.UgFnSN4&bxsign=scd7fVjWiuAdaVF9IWPRnH-aVCofWKHVNbA9YOC3YWLrrDMwNZgLit2jZUBIBDj6aNhOlcPfcXr_odogmSCQeRh6J4dKjZVoBf6uA-NLYQRYgB-5yC2nYyX5N4fDyv9RViOgmgYDKfBaP4phh2IL6qczQ&tk=t6Cbd1rMSun&app=chrome'):
-    link = text
-    dict_ = get_data_with_selenium(link)
-    # images = dict_['image']
-    # for img in images:
-    #     await message.answer_photo(base64.b64decode(img))
-    print(Fore.GREEN + 'dump finally ready')
-
-    return dict_
-
-
-if __name__ == '__main__':
-    main()
+    return f'test{num}.jpg'
