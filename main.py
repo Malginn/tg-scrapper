@@ -110,8 +110,8 @@ def get_data_with_selenium(link):
 
         try:
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
-            for image in images:
-                dict_value['image'].append(download(image.get_attribute('src')))
+            for num, image in enumerate(images):
+                dict_value['image'].append(download(image.get_attribute('src'), num))
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
 
@@ -121,12 +121,15 @@ def get_data_with_selenium(link):
         return dict_value
 
 
-def download(url):
+def download(url, num):
     resource = urllib.request.urlopen(url)
-    image = base64.b64encode(resource.read())
+    with open(f"./images/test{num}.jpg", 'wb') as out:
+        out.write(resource.read())
+    
+
+    # image = base64.b64encode(resource.read())
     # for decode use:
     # base64.b64decode(image)
-    return image
 
 
 def main(text='https://item.taobao.com/item.htm?id=687815414870&price=194.99&sourceType=item&sourceType=item&suid=f4ab6dfd-3c89-4606-81a7-b9b74ad5adb9&ut_sk=1.YgbGi%2FkQyU0DAD3WQG9i%2BcAZ_21646297_1668264784118.Copy.ShareGlobalNavigation_1&un=75b8c07d63d793d3b869032d15dddb3f&share_crt_v=1&un_site=0&spm=a2159r.13376460.0.0&sp_abtk=gray_ShareGlobalNavigation_1_code_simpleAndroid&tbSocialPopKey=shareItem&sp_tk=dDZDYmQxck1TdW4%3D&cpp=1&shareurl=true&short_name=h.UgFnSN4&bxsign=scd7fVjWiuAdaVF9IWPRnH-aVCofWKHVNbA9YOC3YWLrrDMwNZgLit2jZUBIBDj6aNhOlcPfcXr_odogmSCQeRh6J4dKjZVoBf6uA-NLYQRYgB-5yC2nYyX5N4fDyv9RViOgmgYDKfBaP4phh2IL6qczQ&tk=t6Cbd1rMSun&app=chrome&price=194.99&sourceType=item&sourceType=item&suid=f4ab6dfd-3c89-4606-81a7-b9b74ad5adb9&ut_sk=1.YgbGi%2FkQyU0DAD3WQG9i%2BcAZ_21646297_1668264784118.Copy.ShareGlobalNavigation_1&un=75b8c07d63d793d3b869032d15dddb3f&share_crt_v=1&un_site=0&spm=a2159r.13376460.0.0&sp_abtk=gray_ShareGlobalNavigation_1_code_simpleAndroid&tbSocialPopKey=shareItem&sp_tk=dDZDYmQxck1TdW4%3D&cpp=1&shareurl=true&short_name=h.UgFnSN4&bxsign=scd7fVjWiuAdaVF9IWPRnH-aVCofWKHVNbA9YOC3YWLrrDMwNZgLit2jZUBIBDj6aNhOlcPfcXr_odogmSCQeRh6J4dKjZVoBf6uA-NLYQRYgB-5yC2nYyX5N4fDyv9RViOgmgYDKfBaP4phh2IL6qczQ&tk=t6Cbd1rMSun&app=chrome'):

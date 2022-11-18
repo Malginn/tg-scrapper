@@ -2,6 +2,8 @@ from aiogram import Bot, Dispatcher, executor, types
 from url import dict_
 from main import main
 import base64
+import os
+import shutil
 
 from googletrans import Translator
 translator = Translator()
@@ -37,6 +39,11 @@ def translate_text():
         else:
             dict_[k] = translator.translate(v, src='zh-tw', dest='ru').text
         return dict_
+    
+def clear_img():
+    shutil.rmtree('./images/')
+    os.makedirs('./images/')
+    # os.remove(file)
 
 
 API_TOKEN = '5692130473:AAFYtJiFHRfw2Rh1lLeDb1e7fxdywH3575U'
@@ -57,12 +64,15 @@ async def all_msg_handler(message: types.Message):
     dict_ = main()  #text
 
     # await message.answer_photo(message.chat.id, photo=photo, caption="text")
-    media = types.MediaGroup()
-    images = [base64.b64decode(i) for i in dict_['image']]
-    
-    for num, img in enumerate(images):
-        media.attach_photo(types.InputMediaPhoto(img, caption = prepare_item(dict_) if num == 0 else ''))
-        await message.answer_media_group(media=media)
+    # media = types.MediaGroup()
+    media = []
+    # images = [base64.b64decode(i) for i in dict_['image']]
+    for num in range(len(dict_['image'])):
+
+        media.append(types.InputMedia(f'./images/test{num}.jpg'))    #, prepare_item(dict_) if num == 0 else ''
+        await bot.send_media_group(message.chat.id, media=media)
+
+    clear_img()
 
 
 
