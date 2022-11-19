@@ -87,6 +87,7 @@ def get_data_with_selenium(link):
             dict_value['color'] = driver.find_element(By.XPATH, dict_xpath['color']).text
         except NoSuchElementException:
             print(Fore.RED + 'Color not found')
+            print(Fore.BLUE + (type(dict_value['color'])))
 
         try:
             for characteristic in driver.find_elements(By.XPATH, dict_xpath['characteristic']):
@@ -97,6 +98,7 @@ def get_data_with_selenium(link):
         try:
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
             for image in images:
+                print(type(image))
                 ActionChains(driver).move_to_element(image).perform()
                 time.sleep(0.5)
                 dict_value['image'].append(download(image.get_attribute('src'), images.index(image)))
@@ -104,6 +106,7 @@ def get_data_with_selenium(link):
             print(Fore.RED + 'Images not found')
 
     finally:
+
         driver.close()
         driver.quit()
         return dict_value

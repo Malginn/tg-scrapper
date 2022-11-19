@@ -59,17 +59,28 @@ def translate_text(data):
 # должно пофиксить
 def translator_update(data):
     translator = Translator()
+    if len(data['name']) > 0:
+        data['name'] = translator.translate('Table', src='zh-tw', dest='ru').text
+    else:
+        data['name'] = 'Не найдено имя'
 
-    data['name'] = translator.translate('Table', src='zh-tw', dest='ru').text
-
-    data['seller'] = translator.translate(data['seller'], src='zh-tw', dest='ru').text
+    if len(data['seller']) > 0:
+        data['seller'] = translator.translate(data['seller'], src='zh-tw', dest='ru').text
+    else:
+        data['seller'] = 'Не найден продавец'
 
     new_characteristic = list()
-    for value in data['characteristic']:
-        new_characteristic.append(translator.translate(value, src='zh-tw', dest='ru').text)
+    if len(data['characteristic']) > 0:
+        for value in data['characteristic']:
+            new_characteristic.append(translator.translate(value, src='zh-tw', dest='ru').text)
+    else:
+        data['characteristic'] = 'Не найдены харакетиристики'
     data['characteristic'] = new_characteristic
 
-    data['color'] = translator.translate(data['color'], src='zh-tw', dest='ru').text
+    if len(data['color']) > 0:
+        data['color'] = translator.translate(data['color'], src='zh-tw', dest='ru').text
+    else:
+        data['color'] = 'Не найден цвет'
     return data
 
 
@@ -90,7 +101,7 @@ async def start_cmd_handler(message: types.Message):
 async def all_msg_handler(message: types.Message):
     # берем url с сообщения и парсим сайт
     url = message.text
-    data = get_data_with_selenium(url)
+    data = get_data_with_selenium('https://item.taobao.com/item.htm?spm=a1z10.5-c-s.w4002-22637139779.40.3834709dUCU5ow&id=692133878189')
 
     # перевод и подготовка текста
     data = translator_update(data)
@@ -100,11 +111,12 @@ async def all_msg_handler(message: types.Message):
     media = types.MediaGroup()
     for image in data['image']:
         if data['image'].index(image) == len(data['image'])-1:
-            media.attach_photo(types.InputFile(f'./images/{image}'), prepare_data)
+            media.attach_photo(types.InputMediaPhoto(f'./images/{image}'), prepare_data)
         else:
-            media.attach_photo(types.InputFile(f'./images/{image}'))
+            media.attach_photo(types.InputMediaPhoto(f'./images/{image}'))
 
     # отправка результата
+    
     await message.answer_media_group(media=media)
 
 
