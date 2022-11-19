@@ -3,6 +3,7 @@ import os
 import time
 
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -53,18 +54,6 @@ def get_data_with_selenium(link):
         print(ex)
 
     else:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6);")
-        time.sleep(0.5)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6*2);")
-        time.sleep(0.5)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6*3);")
-        time.sleep(0.5)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6*4);")
-        time.sleep(0.5)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6*5);")
-        time.sleep(0.5)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(0.5)
         try:
             dict_value['name'] = driver.find_element(By.XPATH, dict_xpath['name']).text
         except NoSuchElementException:
@@ -108,6 +97,8 @@ def get_data_with_selenium(link):
         try:
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
             for image in images:
+                ActionChains(driver).move_to_element(image).perform()
+                time.sleep(0.5)
                 dict_value['image'].append(download(image.get_attribute('src'), images.index(image)))
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
