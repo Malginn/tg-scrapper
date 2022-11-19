@@ -109,15 +109,19 @@ async def all_msg_handler(message: types.Message):
 
     # упаковка сообщения
     media = types.MediaGroup()
-    for image in data['image']:
-        if data['image'].index(image) == len(data['image'])-1:
-            media.attach_photo(types.InputMediaPhoto(f'./images/{image}'), prepare_data)
-        else:
-            media.attach_photo(types.InputMediaPhoto(f'./images/{image}'))
+    if len(data['image']) > 0:
+        for image in data['image']:
+            if data['image'].index(image) == len(data['image'])-1:
+                media.attach_photo(types.InputFile(f'./images/{image}'), prepare_data)
+            else:
+                media.attach_photo(types.InputFile(f'./images/{image}'))
+        await message.answer('фото есть')
+    else:
+        await message.answer('фото нет')
 
     # отправка результата
     
-    await message.answer_media_group(media=media)
+    # await message.answer_media_group(media=media)
 
 
 if __name__ == '__main__':
