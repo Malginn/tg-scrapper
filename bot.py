@@ -1,13 +1,18 @@
-from aiogram import Bot, Dispatcher, executor, types
-# from url import dict_
-from main import get_data_with_selenium
 import os
 import shutil
 
+from main import get_data_with_selenium
+
+from aiogram import Bot, Dispatcher, executor, types
+
 from googletrans import Translator
-translator = Translator()
+
 
 API_TOKEN = '5692130473:AAFYtJiFHRfw2Rh1lLeDb1e7fxdywH3575U'
+
+# Initialize bot and dispatcher
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
 
 # URL для тестов сделал
 URL = 'https://m.tb.cn/h.UgFnSN4?tk=t6Cbd1rMSun'
@@ -19,10 +24,10 @@ def prepare_item(dict_value):
 Продавец: {dict_value['seller']}\n
 Цена: {price_split(dict_value)}\n
 Размер: {dict_value['size']}\n
-Доставка: {dict_value['delivery']}\n
+Доставка: {dict_value['delivery'].split('¥')[1]+' ¥'}\n
 Цвет: {dict_value['color']}\n
 Характеристика: {charac(dict_value)}\n
-             '''    # 'Картинка': {dict_value['image']
+             '''
 
     return string
 
@@ -38,6 +43,7 @@ def price_split(data):
 
 
 def translate_text(data):
+    translator = Translator()
     for k, v in data.items():
         if type(v) == list:
             for count, i in enumerate(data[k]):
@@ -47,15 +53,32 @@ def translate_text(data):
     return data
 
 
+# сделал обновленный перевод, твою функцию не трогал
+# если ловил googletrans AttributeError: 'NoneType' object has no attribute 'group':
+# pip install googletrans==4.0.0-rc1
+# должно пофиксить
+def translator_update(data):
+    translator = Translator()
+
+    data['name'] = translator.translate('Table', src='zh-tw', dest='ru').text
+
+    data['seller'] = translator.translate(data['seller'], src='zh-tw', dest='ru').text
+
+    new_characteristic = list()
+    for value in data['characteristic']:
+        new_characteristic.append(translator.translate(value, src='zh-tw', dest='ru').text)
+    data['characteristic'] = new_characteristic
+
+    data['color'] = translator.translate(data['color'], src='zh-tw', dest='ru').text
+    return data
+
+
+# удалять не стал, но функция юзлес, ибо мы передаем список имен фото
+# старые фотки перезаписываются на новые и память соответственно не засоряется
 def clear_img():
     shutil.rmtree('./images/')
     os.makedirs('./images/')
     # os.remove(file)
-
-
-# Initialize bot and dispatcher
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
 
 
 @dp.message_handler(commands='start')
@@ -65,21 +88,24 @@ async def start_cmd_handler(message: types.Message):
 
 @dp.message_handler()
 async def all_msg_handler(message: types.Message):
-    text = message.text
-    data = get_data_with_selenium(text)  # URL заменить на message.text
+    # берем url с сообщения и парсим сайт
+    url = message.text
+    data = get_data_with_selenium(url)
+
+    # перевод и подготовка текста
+    data = translator_update(data)
+    prepare_data = prepare_item(data)
+
+    # упаковка сообщения
     media = types.MediaGroup()
     for image in data['image']:
         if data['image'].index(image) == len(data['image'])-1:
-            media.attach_photo(types.InputFile(f'./images/{image}'), )  # text заменить на результат обработки data   , prepare_item(data)
+            media.attach_photo(types.InputFile(f'./images/{image}'), prepare_data)
         else:
             media.attach_photo(types.InputFile(f'./images/{image}'))
+
+    # отправка результата
     await message.answer_media_group(media=media)
-    print('sent photo')
-    data = translate_text(data)
-    print('text translated')
-    await message.answer(f'{prepare_item(data)}\n{text}')
-    print('text sent')
-    clear_img()
 
 
 if __name__ == '__main__':
