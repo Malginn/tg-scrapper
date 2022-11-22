@@ -7,7 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as condition
-from selenium.common import NoSuchElementException, TimeoutException
+from selenium.common import NoSuchElementException, TimeoutException, JavascriptException
 
 from colorama import Fore
 
@@ -83,11 +83,10 @@ def get_data_with_selenium(link):
             print(Fore.RED + 'Delivery not found')
 
         try:
-            colors = driver.find_elements(By.XPATH, dict_xpath['color'])
-            for color in colors:
-                if color.text != '':
-                    dict_value['color'].append(color.text)
-        except NoSuchElementException:
+            colors = driver.execute_script("return Hub.config.get('sku').valItemInfo.propertyMemoMap")
+            for color in colors.values():
+                dict_value['color'].append(color)
+        except JavascriptException:
             print(Fore.RED + 'Color not found')
 
         try:
@@ -100,7 +99,7 @@ def get_data_with_selenium(link):
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
             for image in images:
                 img_50 = image.get_attribute('src')
-                img_400 = img_50.replace('50x50.jpg.webp', '400x400.jpg')
+                img_400 = img_50.replace('50x50.jpg_.webp', '400x400.jpg')
                 dict_value['image'].append(download(img_400, images.index(image)))
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
