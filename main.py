@@ -3,7 +3,6 @@ import os
 import time
 
 from selenium import webdriver
-from selenium.webdriver import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -98,13 +97,11 @@ def get_data_with_selenium(link):
             print(Fore.RED + 'Characteristics not found')
 
         try:
-            # image_parent = driver.find_element(By.XPATH, dict_xpath['image'])
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
             for image in images:
-                ActionChains(driver).move_to_element(image).perform()
-                time.sleep(0.5)
-                dwnld_img = driver.find_element(By.XPATH, '//*[@id="J_ImgBooth"]')
-                dict_value['image'].append(download(dwnld_img.get_attribute('src'), images.index(image)))
+                png_50 = image.get_attribute('src')
+                png_400 = png_50.replace('png_50x50.jpg_.webp', 'png_400x400.jpg')
+                dict_value['image'].append(download(png_400, images.index(image)))
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
 
