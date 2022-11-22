@@ -21,11 +21,11 @@ def get_data_with_selenium(link):
     dict_xpath = {'name': '//*[@class="tb-main-title"]',
                   'seller': '//*[@class="tb-shop-name"]',
                   'price': '//*[@class="tb-rmb-num"]',
-                  'size': '//*[@data-property="尺码"]/li/a/span',
+                  'size': '//*[@class="J_TSaleProp tb-clearfix"]/li/a/span',
                   'delivery': '//*[@id="J_WlServiceInfo"]',
-                  'color': '//*[@data-property="颜色分类"]/li/a/span',
+                  'color': '//*[contains(@data-property,"颜色")]/li/a/span',
                   'characteristic': '//*[@class="attributes-list"]/li',
-                  'image': '//*[@id="description"]/div/table/tbody/tr/td/img'}
+                  'image': '//*[@id="J_UlThumb"]/li/div/a/img'}
 
     chrome_options = Options()
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
@@ -37,7 +37,7 @@ def get_data_with_selenium(link):
                   'price': list(),
                   'size': list(),
                   'delivery': '',
-                  'color': '',
+                  'color': list(),
                   'characteristic': list(),
                   'image': list()
                   }
@@ -84,10 +84,12 @@ def get_data_with_selenium(link):
             print(Fore.RED + 'Delivery not found')
 
         try:
-            dict_value['color'] = driver.find_element(By.XPATH, dict_xpath['color']).text
+            colors = driver.find_elements(By.XPATH, dict_xpath['color'])
+            for color in colors:
+                if color.text != '':
+                    dict_value['color'].append(color.text)
         except NoSuchElementException:
             print(Fore.RED + 'Color not found')
-            print(Fore.BLUE + (type(dict_value['color'])))
 
         try:
             for characteristic in driver.find_elements(By.XPATH, dict_xpath['characteristic']):
@@ -96,9 +98,9 @@ def get_data_with_selenium(link):
             print(Fore.RED + 'Characteristics not found')
 
         try:
+            # image_parent = driver.find_element(By.XPATH, dict_xpath['image'])
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
             for image in images:
-                print(type(image))
                 ActionChains(driver).move_to_element(image).perform()
                 time.sleep(0.5)
                 dict_value['image'].append(download(image.get_attribute('src'), images.index(image)))

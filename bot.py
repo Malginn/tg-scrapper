@@ -23,11 +23,11 @@ def prepare_item(dict_value):
 Название: {dict_value['name']}\n
 Продавец: {dict_value['seller']}\n
 Цена: {price_split(dict_value)}\n
-Размер: {dict_value['size']}\n
-Доставка: {dict_value['delivery'].split('¥')[1]+' ¥'}\n
+Размер: {size_split(dict_value)}\n
+Доставка: {dict_value['delivery']}\n    
 Цвет: {dict_value['color']}\n
 Характеристика: {charac(dict_value)}\n
-             '''
+             '''    #.split('¥')[1]+' ¥'
 
     return string
 
@@ -41,6 +41,9 @@ def price_split(data):
     str_pr = ' '.join(data['price'])
     return str_pr
 
+def size_split(data):
+    sizes = ' '.join(data['size'])
+    return sizes
 
 def translate_text(data):
     translator = Translator()
@@ -74,13 +77,18 @@ def translator_update(data):
         for value in data['characteristic']:
             new_characteristic.append(translator.translate(value, src='zh-tw', dest='ru').text)
     else:
-        data['characteristic'] = 'Не найдены харакетиристики'
+        data['characteristic'] = 'Не найдены характеристики'
     data['characteristic'] = new_characteristic
 
+    new_color = list()
     if len(data['color']) > 0:
-        data['color'] = translator.translate(data['color'], src='zh-tw', dest='ru').text
+        print(data['color'])
+        for value in data['color']:
+            new_color.append(translator.translate(value, src='zh-tw', dest='ru').text)
     else:
-        data['color'] = 'Не найден цвет'
+        new_color = 'Не найден цвет'
+    data['color'] = new_color
+
     return data
 
 
@@ -101,7 +109,8 @@ async def start_cmd_handler(message: types.Message):
 async def all_msg_handler(message: types.Message):
     # берем url с сообщения и парсим сайт
     url = message.text
-    data = get_data_with_selenium('https://item.taobao.com/item.htm?spm=a1z10.5-c-s.w4002-22637139779.40.3834709dUCU5ow&id=692133878189')
+    data = get_data_with_selenium(url)
+    # await message.answer(data['color'])
 
     # перевод и подготовка текста
     data = translator_update(data)
@@ -112,7 +121,7 @@ async def all_msg_handler(message: types.Message):
     if len(data['image']) > 0:
         for image in data['image']:
             if data['image'].index(image) == len(data['image'])-1:
-                media.attach_photo(types.InputFile(f'./images/{image}'), prepare_data)
+                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}\n{url}')
             else:
                 media.attach_photo(types.InputFile(f'./images/{image}'))
         await message.answer('фото есть')
@@ -121,7 +130,7 @@ async def all_msg_handler(message: types.Message):
 
     # отправка результата
     
-    # await message.answer_media_group(media=media)
+    await message.answer_media_group(media=media)
 
 
 if __name__ == '__main__':
