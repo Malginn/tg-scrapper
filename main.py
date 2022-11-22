@@ -18,7 +18,7 @@ def get_data_with_selenium(link):
     time.sleep(3)
 
     dict_xpath = {'name': '//*[@class="tb-main-title"]',
-                  'seller': '//*[@class="tb-shop-name"]',
+                  'seller': '//*[contains(@class,"shop-name")]',
                   'price': '//*[@class="tb-rmb-num"]',
                   'size': '//*[@class="J_TSaleProp tb-clearfix"]/li/a/span',
                   'delivery': '//*[@id="J_WlServiceInfo"]',
@@ -99,9 +99,9 @@ def get_data_with_selenium(link):
         try:
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
             for image in images:
-                png_50 = image.get_attribute('src')
-                png_400 = png_50.replace('png_50x50.jpg_.webp', 'png_400x400.jpg')
-                dict_value['image'].append(download(png_400, images.index(image)))
+                img_50 = image.get_attribute('src')
+                img_400 = img_50.replace('50x50.jpg.webp', '400x400.jpg')
+                dict_value['image'].append(download(img_400, images.index(image)))
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
 

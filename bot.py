@@ -23,28 +23,19 @@ def prepare_item(dict_value):
     string = f'''
 Название: {dict_value['name']}\n
 Продавец: {dict_value['seller']}\n
-Цена: {price_split(dict_value)}\n
-Размер: {size_split(dict_value)}\n
+Цена: {split_(dict_value['price'], ' ')}\n
+Размер: {split_(dict_value['size'], ' ')}\n
 Доставка: {dict_value['delivery']}\n    
 Цвет: {dict_value['color']}\n
-Характеристика: {charac(dict_value)}\n
-             '''    #.split('¥')[1]+' ¥'
+Характеристика: {split_(dict_value['characteristic'])}\n
+             '''    
+#.split('¥')[1]+' ¥'
 
     return string
 
-
-def charac(data):
-    str_ch = '\n'.join(data['characteristic']) 
-    return str_ch
-
-
-def price_split(data):
-    str_pr = ' '.join(data['price'])
-    return str_pr
-
-def size_split(data):
-    sizes = ' '.join(data['size'])
-    return sizes
+def split_(key, separator='\n'):
+    string = separator.join(key)
+    return string
 
 def translate_text(data):
     translator = Translator()
@@ -83,12 +74,24 @@ def translator_update(data):
 
     new_color = list()
     if len(data['color']) > 0:
-        print(data['color'])
         for value in data['color']:
             new_color.append(translator.translate(value, src='zh-tw', dest='ru').text)
     else:
         new_color = 'Не найден цвет'
     data['color'] = new_color
+
+    if len(data['delivery']) > 0:
+        data['delivery'] = translator.translate(data['delivery'], src='zh-tw', dest='ru').text
+    else:
+        data['delivery'] = 'Не найдена доставка'
+
+    new_size = list()
+    if len(data['size']) > 0:
+        for value in data['size']:
+            new_size.append(translator.translate(value, src='zh-tw', dest='ru').text)
+    else:
+        new_size = 'Не найден размер'
+    data['size'] = new_size
 
     return data
 
