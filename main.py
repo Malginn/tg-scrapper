@@ -103,7 +103,8 @@ def get_data_with_selenium(link):
             for image in images:
                 ActionChains(driver).move_to_element(image).perform()
                 time.sleep(0.5)
-                dict_value['image'].append(download(image.get_attribute('src'), images.index(image)))
+                dwnld_img = driver.find_element(By.XPATH, '//*[@id="J_ImgBooth"]')
+                dict_value['image'].append(download(dwnld_img.get_attribute('src'), images.index(image)))
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
 

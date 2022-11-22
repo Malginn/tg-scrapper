@@ -121,7 +121,7 @@ async def all_msg_handler(message: types.Message):
     if len(data['image']) > 0:
         for image in data['image']:
             if data['image'].index(image) == len(data['image'])-1:
-                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}\n{url}')
+                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}')
             else:
                 media.attach_photo(types.InputFile(f'./images/{image}'))
         await message.answer('фото есть')
