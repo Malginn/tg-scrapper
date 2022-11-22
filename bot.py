@@ -4,6 +4,7 @@ import shutil
 from main import get_data_with_selenium
 
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.utils.markdown import hlink, link
 
 from googletrans import Translator
 
@@ -111,7 +112,7 @@ async def all_msg_handler(message: types.Message):
     url = message.text
     data = get_data_with_selenium(url)
     # await message.answer(data['color'])
-
+    hyper_url = hlink('Link for item', 'https://example.com')
     # перевод и подготовка текста
     data = translator_update(data)
     prepare_data = prepare_item(data)
@@ -121,7 +122,7 @@ async def all_msg_handler(message: types.Message):
     if len(data['image']) > 0:
         for image in data['image']:
             if data['image'].index(image) == len(data['image'])-1:
-                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}')
+                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}\n{hyper_url}')
             else:
                 media.attach_photo(types.InputFile(f'./images/{image}'))
         await message.answer('фото есть')
