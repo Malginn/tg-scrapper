@@ -26,7 +26,7 @@ def prepare_item(dict_value):
 Цена: {split_(dict_value['price'], ' ')}\n
 Размер: {split_(dict_value['size'], ' ')}\n
 Доставка: {dict_value['delivery']}\n    
-Цвет: {dict_value['color']}\n
+Цвет: {split_(dict_value['color'])}\n
 Характеристика: {split_(dict_value['characteristic'])}\n
              '''    
 #.split('¥')[1]+' ¥'
@@ -115,7 +115,7 @@ async def all_msg_handler(message: types.Message):
     url = message.text
     data = get_data_with_selenium(url)
     # await message.answer(data['color'])
-    hyper_url = hlink('Link for item', 'https://example.com')
+    hyper_link = f'<a href="{url}">Ссылка на товар</a>'
     # перевод и подготовка текста
     data = translator_update(data)
     prepare_data = prepare_item(data)
@@ -125,7 +125,7 @@ async def all_msg_handler(message: types.Message):
     if len(data['image']) > 0:
         for image in data['image']:
             if data['image'].index(image) == len(data['image'])-1:
-                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}\n{hyper_url}')
+                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}\n{hyper_link}', parse_mode="HTML")
             else:
                 media.attach_photo(types.InputFile(f'./images/{image}'))
         await message.answer('фото есть')
