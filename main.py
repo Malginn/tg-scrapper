@@ -32,7 +32,7 @@ def get_data_with_selenium(link):
     driver = webdriver.Chrome(chrome_driver, chrome_options=chrome_options)
 
     dict_value = {'name': '',
-                  'seller': '',
+                #   'seller': '',
                   'price': list(),
                   'size': list(),
                   'delivery': '',
@@ -58,10 +58,10 @@ def get_data_with_selenium(link):
         except NoSuchElementException:
             print(Fore.RED + 'Name not found')
 
-        try:
-            dict_value['seller'] = driver.find_element(By.XPATH, dict_xpath['seller']).text
-        except NoSuchElementException:
-            print(Fore.RED + 'Seller not found')
+        # try:
+        #     dict_value['seller'] = driver.find_element(By.XPATH, dict_xpath['seller']).text
+        # except NoSuchElementException:
+        #     print(Fore.RED + 'Seller not found')
 
         try:
             prices = driver.find_elements(By.XPATH, dict_xpath['price'])

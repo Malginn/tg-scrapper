@@ -1,8 +1,13 @@
-import shutil
-import os
+# import shutil
+# import os
 
-def clear_img():
-    shutil.rmtree('./images/')
-    os.makedirs('./images/')
+# def clear_img():
+#     shutil.rmtree('./images/')
+#     os.makedirs('./images/')
 
-clear_img()
+# clear_img()
+
+if None:
+    print(True)
+else:
+    print(False)
