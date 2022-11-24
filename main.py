@@ -18,13 +18,14 @@ def get_data_with_selenium(link):
     time.sleep(3)
 
     dict_xpath = {'name': '//*[@class="tb-main-title"]',
-                  'seller': '//*[contains(@class,"shop-name")]',
+                  # 'seller': '//*[contains(@class,"shop-name")]',
                   'price': '//*[@class="tb-rmb-num"]',
                   'size': '//*[@class="J_TSaleProp tb-clearfix"]/li/a/span',
                   'delivery': '//*[@id="J_WlServiceInfo"]',
                   'color': '//*[contains(@data-property,"颜色")]/li/a/span',
                   'characteristic': '//*[@class="attributes-list"]/li',
-                  'image': '//*[@id="J_UlThumb"]/li/div/a/img'}
+                  'image': '//*[@id="J_UlThumb"]/li/div/a/img',
+                  'video': '//*[@class="lib-video"]/source'}
 
     chrome_options = Options()
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
@@ -32,13 +33,14 @@ def get_data_with_selenium(link):
     driver = webdriver.Chrome(chrome_driver, chrome_options=chrome_options)
 
     dict_value = {'name': '',
-                #   'seller': '',
+                  # 'seller': '',
                   'price': list(),
                   'size': list(),
                   'delivery': '',
                   'color': list(),
                   'characteristic': list(),
-                  'image': list()
+                  'image': list(),
+                  'video': ''
                   }
 
     try:
@@ -100,9 +102,24 @@ def get_data_with_selenium(link):
             for image in images:
                 img_50 = image.get_attribute('src')
                 img_400 = img_50.replace('50x50.jpg_.webp', '400x400.jpg')
-                dict_value['image'].append(download(img_400, images.index(image)))
+                dict_value['image'].append(download_img(img_400, images.index(image)))
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
+
+        try:
+            # надо вытянуть все *.jpg
+            # как сделаешь я сделаю из них рабочие ссылки на скачивания
+            image_json = driver.execute_script("return Hub.config.get('desc').apiImgInfo")
+            print(image_json)
+        except JavascriptException:
+            print(Fore.RED + 'Color not found')
+
+        try:
+            video = driver.find_element(By.XPATH, dict_xpath['video'])
+            video_url = video.get_attribute('src')
+            dict_value['video'] = download_video(video_url)
+        except NoSuchElementException:
+            print(Fore.RED + 'Video not found')
 
     finally:
 
@@ -111,8 +128,15 @@ def get_data_with_selenium(link):
         return dict_value
 
 
-def download(url, num):
+def download_img(url, num):
     resource = urllib.request.urlopen(url)
     with open(f"./images/test{num}.jpg", 'wb') as out:
         out.write(resource.read())
     return f'test{num}.jpg'
+
+
+def download_video(url):
+    resource = urllib.request.urlopen(url)
+    with open("./images/video.mp4", 'wb') as out:
+        out.write(resource.read())
+    return f'video.mp4'
