@@ -11,6 +11,7 @@ from selenium.common import NoSuchElementException, TimeoutException, Javascript
 
 from colorama import Fore
 import requests
+from requests import HTTPError
 import json
 
 
@@ -104,18 +105,23 @@ def get_data_with_selenium(link):
             for image in images:
                 img_50 = image.get_attribute('src')
                 img_400 = img_50.replace('50x50.jpg_.webp', '400x400.jpg')
-                dict_value['image'].append(download_img(img_400, images.index(image)))
+                value = download_img(img_400, images.index(image), prefix='first')
+                dict_value['image'].append(value)
         except NoSuchElementException:
             print(Fore.RED + 'Images not found')
 
         try:
-            # надо вытянуть все *.jpg
-            # как сделаешь я сделаю из них рабочие ссылки на скачивания)
-
             image_json_link = driver.execute_script("return Hub.config.get('desc').apiImgInfo")
             img_names = download_img_name(image_json_link)
-            print(img_names)
-
+            for name in img_names:
+                while True:
+                    try:
+                        value = download_img(prepare_link(name), img_names.index(name), prefix='second')
+                        dict_value['image'].append(value)
+                    except HTTPError:
+                        pass
+                    else:
+                        break
         except JavascriptException:
             print(Fore.RED + 'Color not found')
 
@@ -133,11 +139,11 @@ def get_data_with_selenium(link):
         return dict_value
 
 
-def download_img(url, num):
+def download_img(url, num, prefix='test'):
     resource = urllib.request.urlopen(url)
-    with open(f"./images/test{num}.jpg", 'wb') as out:
+    with open(f"./images/{prefix}{num}.jpg", 'wb') as out:
         out.write(resource.read())
-    return f'test{num}.jpg'
+    return f'{prefix}{num}.jpg'
 
 
 def download_video(url):
@@ -145,6 +151,7 @@ def download_video(url):
     with open("./images/video.mp4", 'wb') as out:
         out.write(resource.read())
     return f'video.mp4'
+
 
 def download_img_name(image_json_link):
     r = requests.get(image_json_link)
@@ -154,3 +161,10 @@ def download_img_name(image_json_link):
         image_name_list.append(k)
     image_name_list = image_name_list[4:]
     return image_name_list
+
+
+def prepare_link(json_name):
+    prefix = json_name.split('!!')[1]
+    prefix = prefix[:-4]
+    link = f'https://img.alicdn.com/imgextra/i1/{prefix}/{json_name}'
+    return link
