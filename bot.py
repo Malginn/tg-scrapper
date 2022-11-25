@@ -5,19 +5,18 @@ from main import get_data_with_selenium
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.utils.markdown import hlink, link
+from auth_data import TOKEN
 
 from googletrans import Translator
 translator = Translator()
 
 
-API_TOKEN = '5692130473:AAFYtJiFHRfw2Rh1lLeDb1e7fxdywH3575U'
-
 # Initialize bot and dispatcher
-bot = Bot(token=API_TOKEN)
+bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
 # URL для тестов сделал
-URL = 'https://m.tb.cn/h.UgFnSN4?tk=t6Cbd1rMSun'
+# URL = 'https://m.tb.cn/h.UgFnSN4?tk=t6Cbd1rMSun'
 
 
 def prepare_item(dict_value):
@@ -45,17 +44,6 @@ def is_exist_fun(key, separator='\n'):
     elif type(key) != list:
         return key
     return split_(key, separator)
-
-
-# def translate_text(data):
-#     translator = Translator()
-#     for k, v in data.items():
-#         if type(v) == list:
-#             for count, i in enumerate(data[k]):
-#                 data[k][count] = translator.translate(i, src='zh-tw', dest='ru').text
-#         else:
-#             data[k] = translator.translate(v, src='zh-tw', dest='ru').text
-#     return data
 
 
 # сделал обновленный перевод, твою функцию не трогал
@@ -90,12 +78,33 @@ def translator_update(data):
     return data
 
 
+def add_img(key, media, prepare_data, hyper_link, is_first):
+    if is_first:
+        for image in key:
+            if key.index(image) == len(key)-1:
+                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}\n{hyper_link}', parse_mode="HTML")
+            else:
+                media.attach_photo(types.InputFile(f'./images/{image}'))
+
+    else:
+        media = types.MediaGroup()
+        for image in key:
+            media.attach_photo(types.InputFile(f'./images/{image}'))
+
+def add_video(media, key):
+    for video in key:
+        media.attach_video(types.InputFile(f'./video/{video}'))
+    
 # удалять не стал, но функция юзлес, ибо мы передаем список имен фото
 # старые фотки перезаписываются на новые и память соответственно не засоряется
 def clear_img():
     shutil.rmtree('./images/')
     os.makedirs('./images/')
-    # os.remove(file)
+
+def clear_video():
+    shutil.rmtree('./video/')
+    os.makedirs('./video/')
+
 
 
 @dp.message_handler(commands='start')
@@ -114,7 +123,7 @@ async def all_msg_handler(message: types.Message):
     prepare_data = prepare_item(data)
     hyper_link = f'<a href="{url}">Ссылка на товар</a>'
 
-    # #сокращаем текст для отправки сообщения
+    # сокращаем текст для отправки сообщения
     while len(prepare_data) > 1024:
         data['characteristic'] = data['characteristic'].pop()
         prepare_data = prepare_item(data)
@@ -122,17 +131,51 @@ async def all_msg_handler(message: types.Message):
     # упаковка сообщения
     media = types.MediaGroup()
     if len(data['image']) > 0:
-        for image in data['image']:
-            if data['image'].index(image) == len(data['image'])-1:
-                media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}\n{hyper_link}', parse_mode="HTML")
-            else:
-                media.attach_photo(types.InputFile(f'./images/{image}'))
+        if len(data['image']) + len(data['video']) < 11:
+            # for image in data['image']:
+            #     if data['image'].index(image) == len(data['image'])-1:
+            #         media.attach_photo(types.InputFile(f'./images/{image}'), f'{prepare_data}\n{hyper_link}', parse_mode="HTML")
+            #     else:
+            #         media.attach_photo(types.InputFile(f'./images/{image}'))
+            add_img(data['image'], media, prepare_data, hyper_link, is_first=True)
+            if data['video'] > 0: 
+                add_video(media, data['video']) 
+            else: 
+                pass
+
+            await message.answer_media_group(media=media)
+        
+
+        elif len(data['image']) + len(data['video']) <21:
+            #дробим картинки на два массива и отправляем по отдельности
+            first_img = data['image'][ : len(data['image'])/2]
+            second_img = data['image'][len(data['image'])/2 : ]
+
+            first_media = add_img(first_img, media, prepare_data, hyper_link, is_first=True)
+            second_media = add_img(second_img, media, prepare_data, hyper_link, is_first=False)
+            if data['video'] > 0: 
+                add_video(first_media, data['video']) 
+            else: 
+                pass
+
+            await message.answer_media_group(media=first_media)
+            await message.answer_media_group(media=second_media)
+
+
+        else:
+            await message.answer('Картинок больше 20 ;(')
+
     else:
         await message.answer('Фото нет, товара не будет')
 
+    clear_img()
+    clear_video()
+
+
+
     # отправка результата
     
-    await message.answer_media_group(media=media)
+    
 
 
 if __name__ == '__main__':
