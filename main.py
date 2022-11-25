@@ -10,6 +10,8 @@ from selenium.webdriver.support import expected_conditions as condition
 from selenium.common import NoSuchElementException, TimeoutException, JavascriptException
 
 from colorama import Fore
+import requests
+import json
 
 
 def get_data_with_selenium(link):
@@ -108,9 +110,12 @@ def get_data_with_selenium(link):
 
         try:
             # надо вытянуть все *.jpg
-            # как сделаешь я сделаю из них рабочие ссылки на скачивания
-            image_json = driver.execute_script("return Hub.config.get('desc').apiImgInfo")
-            print(image_json)
+            # как сделаешь я сделаю из них рабочие ссылки на скачивания)
+
+            image_json_link = driver.execute_script("return Hub.config.get('desc').apiImgInfo")
+            img_names = download_img_name(image_json_link)
+            print(img_names)
+
         except JavascriptException:
             print(Fore.RED + 'Color not found')
 
@@ -140,3 +145,12 @@ def download_video(url):
     with open("./images/video.mp4", 'wb') as out:
         out.write(resource.read())
     return f'video.mp4'
+
+def download_img_name(image_json_link):
+    r = requests.get(image_json_link)
+    image_fucking_dict = json.loads(r.text[14:-1])
+    image_name_list = []
+    for k in image_fucking_dict.keys():
+        image_name_list.append(k)
+    image_name_list = image_name_list[4:]
+    return image_name_list
