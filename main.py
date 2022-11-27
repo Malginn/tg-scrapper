@@ -1,6 +1,7 @@
 import urllib.request
 import os
 import time
+import logging
 
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
@@ -13,6 +14,10 @@ from colorama import Fore
 import requests
 from requests import HTTPError
 import json
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def get_data_with_selenium(link):
@@ -28,7 +33,7 @@ def get_data_with_selenium(link):
                   'color': '//*[contains(@data-property,"颜色")]/li/a/span',
                   'characteristic': '//*[@class="attributes-list"]/li',
                   'image': '//*[@id="J_UlThumb"]/li/div/a/img',
-                  'video': '//*[@class="lib-video"]/source'}
+                  'video': '//*[@class="lib-video"]/video/source'}
 
     chrome_options = Options()
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
@@ -52,6 +57,7 @@ def get_data_with_selenium(link):
         WebDriverWait(driver, timeout).until(condition.presence_of_element_located((By.XPATH, dict_xpath['name'])))
 
     except TimeoutException:
+        logger.debug('TimeoutException')
         print(Fore.RED + 'TimeoutException')
 
     except Exception as ex:
@@ -61,7 +67,7 @@ def get_data_with_selenium(link):
         try:
             dict_value['name'] = driver.find_element(By.XPATH, dict_xpath['name']).text
         except NoSuchElementException:
-            print(Fore.RED + 'Name not found')
+            logger.debug('Name not found')
 
         # try:
         #     dict_value['seller'] = driver.find_element(By.XPATH, dict_xpath['seller']).text
@@ -73,34 +79,35 @@ def get_data_with_selenium(link):
             for price in prices:
                 dict_value['price'].append(price.text)
         except NoSuchElementException:
-            print(Fore.RED + 'Price not found')
+            logger.debug('Price not found')
 
         try:
             sizes = driver.find_elements(By.XPATH, dict_xpath['size'])
             for size in sizes:
                 dict_value['size'].append(size.text)
         except NoSuchElementException:
-            print(Fore.RED + 'Size not found')
+            logger.debug('Size not found')
 
         try:
             dict_value['delivery'] = driver.find_element(By.XPATH, dict_xpath['delivery']).text
         except NoSuchElementException:
-            print(Fore.RED + 'Delivery not found')
+            logger.debug('Delivery not found')
 
         try:
             colors = driver.execute_script("return Hub.config.get('sku').valItemInfo.propertyMemoMap")
             for color in colors.values():
                 dict_value['color'].append(color)
         except JavascriptException:
-            print(Fore.RED + 'Color not found')
+            logger.debug('Color not found')
 
         try:
             for characteristic in driver.find_elements(By.XPATH, dict_xpath['characteristic']):
                 dict_value['characteristic'].append(characteristic.text)
         except NoSuchElementException:
-            print(Fore.RED + 'Characteristics not found')
+            logger.debug('Characteristics not found')
 
         try:
+            logger.debug('Try to found images')
             images = driver.find_elements(By.XPATH, dict_xpath['image'])
             for image in images:
                 img_50 = image.get_attribute('src')
@@ -108,11 +115,12 @@ def get_data_with_selenium(link):
                 value = download_img(img_400, images.index(image), prefix='first')
                 dict_value['image'].append(value)
         except NoSuchElementException:
-            print(Fore.RED + 'Images not found')
+            logger.debug('Images not found')
 
         try:
+            logger.debug('Try to found images 2')
             image_json_link = driver.execute_script("return Hub.config.get('desc').apiImgInfo")
-            img_names = download_img_name(image_json_link)
+            img_names = download_img_name(image_json_link.replace('//', 'http://'))
             for name in img_names:
                 while True:
                     try:
@@ -123,14 +131,15 @@ def get_data_with_selenium(link):
                     else:
                         break
         except JavascriptException:
-            print(Fore.RED + 'Color not found')
+            logger.debug('Images 2 not found')
 
         try:
-            video = driver.find_element(By.XPATH, dict_xpath['video'])
-            video_url = video.get_attribute('src')
+            logger.debug('Try to found videos')
+            video_id = driver.execute_script("return Hub.config.get('video').videoId")
+            video_url = f"http://cloud.video.taobao.com/play/u/2620439306/p/1/e/6/t/1/{video_id}.mp4'"
             dict_value['video'] = download_video(video_url)
-        except NoSuchElementException:
-            print(Fore.RED + 'Video not found')
+        except JavascriptException:
+            logger.debug('Video not found')
 
     finally:
 
@@ -148,7 +157,7 @@ def download_img(url, num, prefix='test'):
 
 def download_video(url):
     resource = urllib.request.urlopen(url)
-    with open("./images/video.mp4", 'wb') as out:
+    with open("./videos/video.mp4", 'wb') as out:
         out.write(resource.read())
     return f'video.mp4'
 
