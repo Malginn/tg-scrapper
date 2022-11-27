@@ -12,7 +12,6 @@ from selenium.common import NoSuchElementException, TimeoutException, Javascript
 
 from colorama import Fore
 import requests
-from requests import HTTPError
 import json
 
 logging.basicConfig(level=logging.INFO)
@@ -126,12 +125,15 @@ def get_data_with_selenium(link):
                     try:
                         value = download_img(prepare_link(name), img_names.index(name), prefix='second')
                         dict_value['image'].append(value)
-                    except HTTPError:
-                        pass
+                    except Exception as e:
+                        print(str(e))
+                        time.sleep(0.5)
                     else:
                         break
         except JavascriptException:
             logger.debug('Images 2 not found')
+        except Exception as e:
+            logger.debug('Exception: '+str(e))
 
         try:
             logger.debug('Try to found videos')
