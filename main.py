@@ -119,7 +119,11 @@ def get_data_with_selenium(link):
                 img_50 = image.get_attribute('src')
                 img_400 = img_50.replace('50x50.jpg_.webp', '400x400.jpg')
                 value = download_img(img_400, images.index(image), prefix='first')
-                dict_value['image'].append(value)
+                file_name = f'./images/{value}'
+                file_stats = os.stat(file_name)
+                file_size = file_stats.st_size
+                if file_size > 100*1024:
+                    dict_value['image'].append(value)
         except NoSuchElementException:
             logger.debug('Images not found')
         except Exception as e:

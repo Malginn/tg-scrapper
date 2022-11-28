@@ -1,5 +1,3 @@
-import logging
-
 from main import get_data_with_selenium
 
 from aiogram import Bot, Dispatcher, executor, types
