@@ -115,21 +115,16 @@ def get_data_with_selenium(link):
                 dict_value['image'].append(value)
         except NoSuchElementException:
             logger.debug('Images not found')
+        except Exception as e:
+            print(str(e))
 
         try:
             logger.debug('Try to found images 2')
             image_json_link = driver.execute_script("return Hub.config.get('desc').apiImgInfo")
             img_names = download_img_name(image_json_link.replace('//', 'http://'))
             for name in img_names:
-                while True:
-                    try:
-                        value = download_img(prepare_link(name), img_names.index(name), prefix='second')
-                        dict_value['image'].append(value)
-                    except Exception as e:
-                        print(str(e))
-                        time.sleep(0.5)
-                    else:
-                        break
+                value = download_img(prepare_link(name), img_names.index(name), prefix='second')
+                dict_value['image'].append(value)
         except JavascriptException:
             logger.debug('Images 2 not found')
         except Exception as e:
@@ -142,6 +137,9 @@ def get_data_with_selenium(link):
             dict_value['video'] = download_video(video_url)
         except JavascriptException:
             logger.debug('Video not found')
+        except Exception as e:
+            logger.debug('video not worked')
+            logger.debug(str(e))
 
     finally:
 
@@ -151,17 +149,30 @@ def get_data_with_selenium(link):
 
 
 def download_img(url, num, prefix='test'):
-    resource = urllib.request.urlopen(url)
-    with open(f"./images/{prefix}{num}.jpg", 'wb') as out:
-        out.write(resource.read())
-    return f'{prefix}{num}.jpg'
+    while True:
+        try:
+            resource = urllib.request.urlopen(url)
+            with open(f"./images/{prefix}{num}.jpg", 'wb') as out:
+                out.write(resource.read())
+        except Exception as e:
+            time.sleep(0.5)
+            logger.debug('download exception')
+            logger.debug(str(e))
+        else:
+            return f'{prefix}{num}.jpg'
 
 
 def download_video(url):
-    resource = urllib.request.urlopen(url)
-    with open("./videos/video.mp4", 'wb') as out:
-        out.write(resource.read())
-    return f'video.mp4'
+    while True:
+        try:
+            resource = urllib.request.urlopen(url)
+            with open("./videos/video.mp4", 'wb') as out:
+                out.write(resource.read())
+        except Exception as e:
+            logger.debug('download exception')
+            logger.debug(str(e))
+        else:
+            return f'video.mp4'
 
 
 def download_img_name(image_json_link):
