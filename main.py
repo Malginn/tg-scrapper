@@ -15,6 +15,8 @@ import requests
 import json
 import random
 
+KB_LIMIT = 30
+
 user_agents = [
   "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
   "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0",
@@ -122,7 +124,7 @@ def get_data_with_selenium(link):
                 file_name = f'./images/{value}'
                 file_stats = os.stat(file_name)
                 file_size = file_stats.st_size
-                if file_size > 100*1024:
+                if file_size > KB_LIMIT*1024:
                     dict_value['image'].append(value)
         except NoSuchElementException:
             logger.debug('Images not found')
@@ -138,7 +140,7 @@ def get_data_with_selenium(link):
                 file_name = f'./images/{value}'
                 file_stats = os.stat(file_name)
                 file_size = file_stats.st_size
-                if file_size > 100*1024:
+                if file_size > KB_LIMIT*1024:
                     dict_value['image'].append(value)
         except JavascriptException:
             logger.debug('Images 2 not found')
