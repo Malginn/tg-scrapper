@@ -135,7 +135,11 @@ def get_data_with_selenium(link):
             img_names = download_img_name(image_json_link.replace('//', 'http://'))
             for name in img_names:
                 value = download_img(prepare_link(name), img_names.index(name), prefix='second')
-                dict_value['image'].append(value)
+                file_name = f'./images/{value}'
+                file_stats = os.stat(file_name)
+                file_size = file_stats.st_size
+                if file_size > 100*1024:
+                    dict_value['image'].append(value)
         except JavascriptException:
             logger.debug('Images 2 not found')
         except Exception as e:

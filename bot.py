@@ -89,7 +89,7 @@ async def all_msg_handler(message: types.Message):
 async def send_photo(images, message):
     media = types.MediaGroup()
     for image in images:
-        media.attach_document(types.InputFile(f'./images/{image}'))
+        media.attach_photo(types.InputFile(f'./images/{image}'))
         if images.index(image) % 10 == 9 or images.index(image) == len(images)-1:
             await message.answer_media_group(media=media)
             media = types.MediaGroup()
