@@ -1,3 +1,5 @@
+import logging
+
 from main import get_data_with_selenium
 
 from aiogram import Bot, Dispatcher, executor, types
@@ -74,11 +76,15 @@ async def all_msg_handler(message: types.Message):
     data = get_data_with_selenium(url)
 
     # перевод и подготовка текста
+    print('translation')
     data = translator_update(data)
     prepare_data = prepare_item(data)
     hyper_link = f'<a href="{url}">Ссылка на товар</a>'
+    print('send photo')
     await send_photo(data['image'], message)
+    print('send video')
     await send_video(data['video'], message)
+    print('send text')
     await send_text(prepare_data, hyper_link, message)
 
 
@@ -86,7 +92,6 @@ async def send_photo(images, message):
     media = types.MediaGroup()
     for image in images:
         media.attach_document(types.InputFile(f'./images/{image}'))
-        print(image)
         if images.index(image) % 10 == 9 or images.index(image) == len(images)-1:
             await message.answer_media_group(media=media)
             media = types.MediaGroup()

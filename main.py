@@ -13,6 +13,13 @@ from selenium.common import NoSuchElementException, TimeoutException, Javascript
 from colorama import Fore
 import requests
 import json
+import random
+
+user_agents = [
+  "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
+  "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0",
+  "Mozilla/5.0 (X11; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
+  ]
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -151,14 +158,19 @@ def get_data_with_selenium(link):
 def download_img(url, num, prefix='test'):
     while True:
         try:
-            resource = urllib.request.urlopen(url)
+            random_user_agent = random.choice(user_agents)
+            headers = {
+                'User-Agent': random_user_agent
+            }
+            req = urllib.request.Request(url, headers=headers)
             with open(f"./images/{prefix}{num}.jpg", 'wb') as out:
-                out.write(resource.read())
+                out.write(urllib.request.urlopen(req).read())
         except Exception as e:
-            time.sleep(0.5)
+            time.sleep(2)
             logger.debug('download exception')
             logger.debug(str(e))
         else:
+            logger.debug(f'download {num} images')
             return f'{prefix}{num}.jpg'
 
 
