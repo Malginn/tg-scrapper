@@ -166,7 +166,8 @@ def get_data_with_selenium(link):
 
 
 def download_img(url, num, prefix='test'):
-    while True:
+    k = 0
+    while k < 50:
         try:
             random_user_agent = random.choice(user_agents)
             headers = {
@@ -182,6 +183,8 @@ def download_img(url, num, prefix='test'):
         else:
             logger.debug(f'download {num} images')
             return f'{prefix}{num}.jpg'
+        finally:
+            k+=1
 
 
 def download_video(url):
