@@ -34,7 +34,7 @@ def get_data_with_selenium(link):
     time.sleep(3)
 
     dict_xpath = {'name': '//*[@class="tb-main-title"]',
-                  # 'seller': '//*[contains(@class,"shop-name")]',
+                  'seller': '//*[contains(@class,"shop-name")]/dl/dd/strong/a',
                   'price': '//*[@class="tb-rmb-num"]',
                   'size': '//*[@class="J_TSaleProp tb-clearfix"]/li/a/span',
                   'delivery': '//*[@id="J_WlServiceInfo"]',
@@ -77,10 +77,10 @@ def get_data_with_selenium(link):
         except NoSuchElementException:
             logger.debug('Name not found')
 
-        # try:
-        #     dict_value['seller'] = driver.find_element(By.XPATH, dict_xpath['seller']).text
-        # except NoSuchElementException:
-        #     print(Fore.RED + 'Seller not found')
+        try:
+            dict_value['seller'] = driver.find_element(By.XPATH, dict_xpath['seller']).get_attribute('href')
+        except NoSuchElementException:
+            print(Fore.RED + 'Seller not found')
 
         try:
             prices = driver.find_elements(By.XPATH, dict_xpath['price'])
@@ -124,7 +124,7 @@ def get_data_with_selenium(link):
                 file_name = f'./images/{value}'
                 file_stats = os.stat(file_name)
                 file_size = file_stats.st_size
-                if file_size > KB_LIMIT*1024:
+                if file_size > KB_LIMIT*1024 and value != 'none':
                     dict_value['image'].append(value)
         except NoSuchElementException:
             logger.debug('Images not found')
@@ -140,7 +140,7 @@ def get_data_with_selenium(link):
                 file_name = f'./images/{value}'
                 file_stats = os.stat(file_name)
                 file_size = file_stats.st_size
-                if file_size > KB_LIMIT*1024:
+                if file_size > KB_LIMIT*1024 and value != 'none':
                     dict_value['image'].append(value)
         except JavascriptException:
             logger.debug('Images 2 not found')
@@ -167,7 +167,7 @@ def get_data_with_selenium(link):
 
 def download_img(url, num, prefix='test'):
     k = 0
-    while k < 50:
+    while True:
         try:
             random_user_agent = random.choice(user_agents)
             headers = {
@@ -180,11 +180,11 @@ def download_img(url, num, prefix='test'):
             time.sleep(2)
             logger.debug('download exception')
             logger.debug(str(e))
+            if '404' in str(e):
+                return 'none'
         else:
             logger.debug(f'download {num} images')
             return f'{prefix}{num}.jpg'
-        finally:
-            k+=1
 
 
 def download_video(url):

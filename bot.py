@@ -78,12 +78,13 @@ async def all_msg_handler(message: types.Message):
     data = translator_update(data)
     prepare_data = prepare_item(data)
     hyper_link = f'<a href="{url}">Ссылка на товар</a>'
+    hyper_seller = f'<a href="{data["seller"]}">Ссылка на продавца</a>'
     print('send photo')
     await send_photo(data['image'], message)
     print('send video')
     await send_video(data['video'], message)
     print('send text')
-    await send_text(prepare_data, hyper_link, message)
+    await send_text(prepare_data, hyper_link, hyper_seller, message)
 
 
 async def send_photo(images, message):
@@ -102,7 +103,7 @@ async def send_video(video, message):
         await message.answer_media_group(media=media)
 
 
-async def send_text(data, hlink, message):
+async def send_text(data, h_link, h_seller, message):
     index = 5
     while len(data[:index]) > 1024:
         index -= 1
@@ -114,13 +115,13 @@ async def send_text(data, hlink, message):
         msg = ''
         for i in range(index, 6):
             msg += data[i]
-        msg += hlink
+        msg += f'{h_link}\n{h_seller}'
         await message.answer(msg, parse_mode='HTML')
     else:
         msg = ''
         for i in range(6):
             msg += data[i]
-        msg += hlink
+        msg += f'{h_link}\n{h_seller}'
         await message.answer(msg, parse_mode='HTML')
 
 
