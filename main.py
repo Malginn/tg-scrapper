@@ -49,7 +49,7 @@ def get_data_with_selenium(link):
     driver = webdriver.Chrome(chrome_driver, chrome_options=chrome_options)
 
     dict_value = {'name': '',
-                  # 'seller': '',
+                  'seller': '',
                   'price': list(),
                   'size': list(),
                   'delivery': '',

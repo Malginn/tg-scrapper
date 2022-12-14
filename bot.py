@@ -78,7 +78,10 @@ async def all_msg_handler(message: types.Message):
     data = translator_update(data)
     prepare_data = prepare_item(data)
     hyper_link = f'<a href="{url}">Ссылка на товар</a>'
-    hyper_seller = f'<a href="{data["seller"]}">Ссылка на продавца</a>'
+    if data["seller"] != '':
+        hyper_seller = f'<a href="{data["seller"]}">Ссылка на продавца</a>'
+    else:
+        hyper_seller = ''
     print('send photo')
     await send_photo(data['image'], message)
     print('send video')
@@ -89,9 +92,9 @@ async def all_msg_handler(message: types.Message):
 
 async def send_photo(images, message):
     media = types.MediaGroup()
-    for image in images:
-        media.attach_photo(types.InputFile(f'./images/{image}'))
-        if images.index(image) % 10 == 9 or images.index(image) == len(images)-1:
+    for i in range(min(20, len(images))):
+        media.attach_photo(types.InputFile(f'./images/{images[i]}'))
+        if i == 9 or i == min(20, len(images))-1:
             await message.answer_media_group(media=media)
             media = types.MediaGroup()
 
